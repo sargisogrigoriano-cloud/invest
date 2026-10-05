@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virtual Investment Profile — prototype</title>
+<style>
+:root{
+  --bg:#0b1020; --bg2:#0f1630; --panel:#141c38; --panel2:#1b2548;
+  --line:#26335e; --txt:#eaf0ff; --mut:#9fb0d8; --mut2:#6f7fa8;
+  --brand:#4f8cff; --brand2:#7b5cff; --gold:#e8b84b; --ok:#38d39f; --danger:#ff6b6b;
+  --radius:16px; --shadow:0 18px 50px rgba(0,0,0,.45);
+  --font:"Inter","Noto Sans","DejaVu Sans",system-ui,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+button{font-family:inherit;cursor:pointer;border:none}
+input,textarea,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+body{
+  font-family:var(--font); color:var(--txt);
+  background:radial-gradient(1200px 700px at 80% -10%,#1a2550 0%,transparent 60%),
+             radial-gradient(900px 600px at -10% 110%,#2a1a50 0%,transparent 55%),
+             var(--bg);
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+.hidden{display:none!important}
+
+.brand-dot{width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  display:grid;place-items:center;font-weight:800;color:#fff;box-shadow:0 6px 18px rgba(79,140,255,.5)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  font-size:12px;font-weight:600;background:var(--panel2);color:var(--mut);border:1px solid var(--line)}
+.pill.ok{color:var(--ok);border-color:rgba(56,211,159,.35);background:rgba(56,211,159,.08)}
+.pill.gold{color:var(--gold);border-color:rgba(232,184,75,.35);background:rgba(232,184,75,.08)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:12px;
+  font-weight:700;font-size:14px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);transition:.15s}
+.btn:hover{border-color:var(--brand);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;
+  box-shadow:0 10px 26px rgba(79,140,255,.4)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+
+/* LOGIN */
+#login{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr}
+.login-hero{position:relative;padding:56px;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(135deg,#101938,#1a1340);overflow:hidden}
+.login-hero:after{content:"";position:absolute;inset:0;
+  background:radial-gradient(500px 400px at 70% 20%,rgba(79,140,255,.25),transparent 60%),
+            radial-gradient(500px 400px at 20% 90%,rgba(123,92,255,.22),transparent 60%)}
+.login-hero>*{position:relative;z-index:1}
+.logo-row{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px;letter-spacing:.3px}
+.hero-mid h1{font-size:40px;line-height:1.1;font-weight:800;margin-bottom:16px}
+.hero-mid p{color:var(--mut);max-width:440px;font-size:16px;line-height:1.6}
+.hero-feats{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.login-form-wrap{display:grid;place-items:center;padding:40px;background:var(--bg2)}
+.login-card{width:100%;max-width:380px}
+.login-card h2{font-size:26px;font-weight:800;margin-bottom:6px}
+.login-card .sub{color:var(--mut);margin-bottom:26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;color:var(--mut);margin-bottom:7px;font-weight:600}
+.field input{width:100%;padding:13px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  color:var(--txt);font-size:15px;transition:.15s}
+.field input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,140,255,.18)}
+.row-between{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--mut);margin-bottom:22px}
+.login-card .btn{width:100%}
+.login-foot{margin-top:20px;text-align:center;font-size:13px;color:var(--mut2)}
+.login-foot b{color:var(--brand)}
+
+/* APP SHELL */
+#app{min-height:100vh;display:grid;grid-template-columns:270px 1fr}
+.sidebar{background:linear-gradient(180deg,var(--bg2),#0c1128);border-right:1px solid var(--line);
+  padding:20px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.side-brand{display:flex;align-items:center;gap:11px;font-weight:800;padding:6px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.side-brand small{display:block;color:var(--mut2);font-weight:600;font-size:11px}
+.nav-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut2);padding:12px 10px 6px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--mut);
+  font-weight:600;font-size:14px;transition:.14s;cursor:pointer;border:1px solid transparent}
+.nav-item .ic{width:22px;text-align:center;font-size:16px}
+.nav-item:hover{background:var(--panel);color:var(--txt)}
+.nav-item.active{background:linear-gradient(135deg,rgba(79,140,255,.18),rgba(123,92,255,.14));
+  color:#fff;border-color:rgba(79,140,255,.35)}
+.nav-item .tag{margin-left:auto;font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(56,211,159,.12);color:var(--ok);font-weight:700}
+.side-user{margin-top:auto;display:flex;align-items:center;gap:11px;padding:12px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),#c98a2b);color:#201500}
+.side-user b{font-size:13px;display:block}
+.side-user small{color:var(--mut2);font-size:11px}
+
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{height:68px;display:flex;align-items:center;gap:16px;padding:0 28px;border-bottom:1px solid var(--line);
+  background:rgba(12,17,40,.6);backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
+.crumb{font-size:13px;color:var(--mut2)}
+.crumb b{color:var(--txt)}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:9px 13px;color:var(--mut2);font-size:13px;min-width:240px}
+.search input{background:none;border:none;color:var(--txt);outline:none;width:100%}
+.icon-btn{width:40px;height:40px;border-radius:12px;background:var(--panel);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:16px;color:var(--mut)}
+.content{padding:28px;overflow:auto}
+.view{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:26px;font-weight:800}
+.page-head p{color:var(--mut);margin-top:6px;max-width:680px;line-height:1.55}
+
+.grid{display:grid;gap:18px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:linear-gradient(180deg,var(--panel),#121a35);border:1px solid var(--line);
+  border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card.hover{transition:.16s;cursor:pointer}
+.card.hover:hover{transform:translateY(-3px);border-color:var(--brand)}
+.card .ic-lg{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:14px;
+  background:var(--panel2);border:1px solid var(--line)}
+.card h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.card .muted{color:var(--mut);font-size:13.5px;line-height:1.5}
+.card .foot{margin-top:16px;display:flex;align-items:center;gap:8px}
+
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat .n{font-size:28px;font-weight:800}
+.stat .l{color:var(--mut);font-size:13px}
+.stat .up{color:var(--ok);font-size:12px;font-weight:700}
+
+.progress{height:9px;border-radius:999px;background:var(--panel2);overflow:hidden;margin-top:10px}
+.progress>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+
+/* SERVICE / SPECIALIST */
+.svc-layout{display:grid;grid-template-columns:1fr 400px;gap:20px;align-items:start}
+.listing{display:flex;flex-direction:column;gap:14px}
+.estate{display:flex;gap:16px;background:linear-gradient(180deg,var(--panel),#121a35);border:1px solid var(--line);
+  border-radius:var(--radius);padding:16px;transition:.15s}
+.estate:hover{border-color:var(--brand)}
+.estate .thumb{width:120px;height:92px;border-radius:12px;flex:none;
+  background:linear-gradient(135deg,#2b3c70,#43306e);display:grid;place-items:center;font-size:30px}
+.estate h4{font-size:16px;margin-bottom:4px}
+.estate .loc{color:var(--mut);font-size:13px;margin-bottom:8px}
+.estate .price{font-weight:800;color:var(--gold);font-size:16px}
+.estate .meta{display:flex;gap:14px;color:var(--mut2);font-size:12px;margin-top:6px;flex-wrap:wrap}
+
+.ai-panel{position:sticky;top:96px;background:linear-gradient(180deg,#141d3c,#0f1630);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 128px);max-height:760px}
+.ai-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.ai-orb{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));
+  display:grid;place-items:center;font-size:20px;box-shadow:0 0 0 4px rgba(79,140,255,.15);position:relative}
+.ai-orb.speaking:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ok);
+  animation:pulse 1s infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.ai-head b{font-size:14px}
+.ai-head small{color:var(--ok);font-size:11px;display:flex;align-items:center;gap:5px}
+.ai-head small:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.vlang{margin-left:auto;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  border-radius:9px;padding:6px 8px;font-size:12px;font-weight:600}
+.ai-body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:85%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.5}
+.msg.ai{background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start}
+.msg.me{background:linear-gradient(135deg,var(--brand),var(--brand2));border-bottom-right-radius:4px;align-self:flex-end;color:#fff}
+.msg.sys{align-self:center;background:rgba(56,211,159,.1);border:1px solid rgba(56,211,159,.35);color:var(--ok);
+  font-size:12.5px;font-weight:600;text-align:center;border-radius:12px}
+.msg.warn{align-self:center;background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.35);color:var(--gold);
+  font-size:12.5px;font-weight:600;text-align:center;border-radius:12px}
+.quick{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
+.quick button{font-size:12px;padding:7px 11px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mut)}
+.quick button:hover{border-color:var(--brand);color:var(--txt)}
+.ai-input{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end}
+.ai-input textarea{flex:1;resize:none;height:44px;max-height:120px;padding:11px 13px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--line);color:var(--txt);font-size:14px}
+.ai-input textarea:focus{outline:none;border-color:var(--brand)}
+.mic,.send{width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;font-size:18px}
+.mic{background:var(--panel);border:1px solid var(--line);color:var(--mut);transition:.15s}
+.mic:hover{border-color:var(--brand);color:var(--txt)}
+.mic.rec{background:linear-gradient(135deg,var(--danger),#b8324e);color:#fff;border:none;animation:recpulse 1s infinite}
+@keyframes recpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.5)}50%{box-shadow:0 0 0 8px rgba(255,107,107,0)}}
+.send{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+.typing{display:flex;gap:4px;padding:11px 14px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+.section-title h2{font-size:18px;font-weight:700}
+
+@media(max-width:1100px){.svc-layout{grid-template-columns:1fr}.ai-panel{position:static;height:600px}
+  .g3{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){#app{grid-template-columns:1fr}.sidebar{display:none}
+  #login{grid-template-columns:1fr}.login-hero{display:none}
+  .g3,.g2{grid-template-columns:1fr}.search{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="login">
+  <div class="login-hero">
+    <div class="logo-row"><span class="brand-dot">V</span> Virtual Investment Profile</div>
+    <div class="hero-mid">
+      <h1>One account for all your global investments and assets</h1>
+      <p>Real estate in Dubai, bank investments, startups, Golden Visa and a family trust — all in one place.
+         A specialist talks with you by voice, understands what you need and takes care of everything for you.</p>
+      <div class="hero-feats">
+        <span class="pill gold">🏙 Real estate · Dubai</span>
+        <span class="pill">🏦 Bank · annual %</span>
+        <span class="pill">🚀 Startups</span>
+        <span class="pill">🛡 Family Trust · Golden Visa</span>
+      </div>
+    </div>
+    <div style="color:var(--mut2);font-size:13px">© 2026 Vavilon Alliance · Dubai</div>
+  </div>
+
+  <div class="login-form-wrap">
+    <div class="login-card">
+      <h2>Sign in</h2>
+      <div class="sub">Log in to your investment profile</div>
+      <div class="field">
+        <label>Email</label>
+        <input id="email" type="email" value="investor@client.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="pass" type="password" value="••••••••" autocomplete="current-password">
+      </div>
+      <div class="row-between">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+          <input type="checkbox" checked> Remember me</label>
+        <a href="#" style="color:var(--brand)">Forgot password?</a>
+      </div>
+      <button class="btn primary" onclick="enterApp()">Sign in →</button>
+      <div class="login-foot">No account yet? <b>Create a profile</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<section id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="side-brand">
+      <span class="brand-dot">V</span>
+      <div>Virtual Profile<small>investment account</small></div>
+    </div>
+
+    <div class="nav-label">Main</div>
+    <div class="nav-item" data-route="home" onclick="location.hash='#home'"><span class="ic">◈</span> My Profile</div>
+
+    <div class="nav-label">My services</div>
+    <div class="nav-item" data-route="developer" onclick="location.hash='#developer'"><span class="ic">🏙</span> Developer <span class="tag">LIVE</span></div>
+    <div class="nav-item" data-route="banks" onclick="location.hash='#banks'"><span class="ic">🏦</span> Banks / Investments <span class="tag">LIVE</span></div>
+    <div class="nav-item" data-route="startups" onclick="location.hash='#startups'"><span class="ic">🚀</span> Startups <span class="tag">LIVE</span></div>
+    <div class="nav-item" data-route="wealth" onclick="location.hash='#wealth'"><span class="ic">🛡</span> Wealth · Trust <span class="tag">LIVE</span></div>
+
+    <div class="nav-label">System</div>
+    <div class="nav-item" onclick="logout()"><span class="ic">⎋</span> Log out</div>
+
+    <div class="side-user">
+      <div class="avatar">I</div>
+      <div><b>Ivan Investorov</b><small>Premium · ID 10482</small></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">Profile</div>
+      <div class="search">🔎<input placeholder="Search real estate, banks, startups…"></div>
+      <button class="icon-btn" title="Notifications">🔔</button>
+      <div class="avatar" style="width:40px;height:40px">I</div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</section>
+
+<script>
+const USER = {name:"Ivan"};
+
+const ESTATES = [
+  {ic:"🌇",t:"Apartment, Dubai Marina",loc:"Dubai, UAE",price:"$485,000",m:["2 bedrooms","110 m²","sea view"]},
+  {ic:"🏖",t:"Villa, Palm Jumeirah",loc:"Dubai, UAE",price:"$2,150,000",m:["5 bedrooms","420 m²","beachfront"]},
+  {ic:"🏙",t:"Studio, Downtown",loc:"Dubai, UAE",price:"$265,000",m:["1 room","48 m²","Burj Khalifa"]},
+  {ic:"🏛",t:"Apartment, Malaga",loc:"Spain",price:"€320,000",m:["3 rooms","95 m²","Golden Visa"]},
+];
+const STARTUPS = [
+  {ic:"🤖",t:"NeoLogistics",loc:"SaaS · logistics",price:"Seed round · $150k for 8%",m:["MRR $12k","+22%/mo"]},
+  {ic:"🌱",t:"GreenFoods MENA",loc:"FoodTech · UAE",price:"Series A · $500k for 5%",m:["revenue $1.1M","MENA market"]},
+  {ic:"💳",t:"PayBridge",loc:"FinTech · payments",price:"Seed · $200k for 10%",m:["licensed","B2B"]},
+];
+const WEALTH = [
+  {ic:"🛂",t:"Golden Visa (UAE / Spain)",loc:"residency by investment",price:"from $205,000",m:["10 years","whole family"]},
+  {ic:"🛡",t:"Family Trust",loc:"asset protection & inheritance",price:"structuring",m:["3 jurisdictions","tax optimization"]},
+  {ic:"📈",t:"Pension fund (Spain)",loc:"savings program",price:"up to 7% a year",m:["lifelong","insured"]},
+];
+
+/* Each service is handled by a live specialist. Replies are templated (keyword-based) for the demo. */
+const SPEC = {
+  developer:{
+    name:"Real estate specialist", role:"Property advisor", orb:"🏙",
+    hello:"Hello, Ivan! I'm your real estate specialist. I can find property anywhere in the world — mostly Dubai. What are you after: an apartment, a villa, a rental, or a Golden Visa property? Tell me your budget.",
+    quick:["Apartment in Dubai up to $500k","Beachfront villa","For Golden Visa","Saved up % — buy a house"],
+    reply:(t)=>{
+      const q=t.toLowerCase();
+      if(q.includes("villa")||q.includes("beach"))
+        return "For a beachfront villa I recommend the Palm Jumeirah villa — 5 bedrooms, 420 m², right on the beach, $2,150,000. Would you like to see photos and the floor plan, or compare it with another villa?";
+      if(q.includes("golden"))
+        return "For a Golden Visa the Malaga apartment (€320,000) qualifies for Spain, and from $205,000 you also qualify in the UAE. Would you like me to walk you through the requirements?";
+      if(q.includes("%")||q.includes("saved")||q.includes("house"))
+        return "Great — once your bank interest reaches the goal, I match houses to that amount. Right now the Dubai Marina apartment ($485,000) fits best. Want me to show a few options in that range?";
+      return "Understood: “"+t+"”. I've shortlisted the options on the left. The Dubai Marina apartment is the most liquid and close to budget. Would you like more details, or to see similar options?";
+    }
+  },
+  banks:{
+    name:"Investment specialist", role:"Bank advisor", orb:"🏦",
+    hello:"Hello! I'm your investment specialist. I offer deposits with annual interest. You can set a goal — for example “in 5 years, buy a house with the accrued interest”. How much are you planning to invest?",
+    quick:["5-year deposit","Goal: buy a house","Maximum %","Minimum risk"],
+    reply:(t)=>{
+      const q=t.toLowerCase();
+      if(q.includes("house")||q.includes("goal"))
+        return "With a $200,000 deposit at 6.5% over 5 years you'd accrue about $274,000. When the goal is reached, I'll match houses at that amount from the Developer. Would you like to set your goal amount now?";
+      if(q.includes("risk")||q.includes("safe"))
+        return "For minimum risk I suggest the conservative portfolio — 4.2% a year, bonds, insured deposit. Would you like to compare it with a higher-yield option?";
+      if(q.includes("max")||q.includes("high"))
+        return "The active portfolio goes up to 11% a year (stocks + startups), with higher risk. Would you like me to break down the expected returns?";
+      return "Noted: “"+t+"”. The 5-year savings deposit at 6.5% fits this well. Would you like to set a goal for it?";
+    }
+  },
+  startups:{
+    name:"Startups specialist", role:"Deal advisor", orb:"🚀",
+    hello:"Hi! I'm your startups specialist. Founders list their projects here. I'll explain each one's terms, show the business analytics and help you enter the deal. Which industry interests you?",
+    quick:["FinTech","FoodTech","Low risk, growing MRR","Show analytics"],
+    reply:(t)=>{
+      const q=t.toLowerCase();
+      if(q.includes("fintech")||q.includes("pay"))
+        return "In FinTech, PayBridge is licensed and B2B — Seed, $200k for 10%. Would you like to see the full business analytics?";
+      if(q.includes("food"))
+        return "In FoodTech, GreenFoods MENA has $1.1M revenue in the MENA market — Series A, $500k for 5%. Want me to pull up the metrics and terms?";
+      return "For “"+t+"” the best candidate is NeoLogistics: MRR $12k, 22%/mo growth, reasonable valuation. Would you like me to walk you through the business analytics?";
+    }
+  },
+  wealth:{
+    name:"Wealth & Trust specialist", role:"Private advisor", orb:"🛡",
+    hello:"Good day! I'm your wealth specialist. I can help with Golden Visa, a family trust and pension programs. Is your goal residency, asset protection, or savings?",
+    quick:["Golden Visa for family","Family Trust","Pension fund","Tax optimization"],
+    reply:(t)=>{
+      const q=t.toLowerCase();
+      if(q.includes("trust")||q.includes("protect")||q.includes("tax"))
+        return "A family trust across 3 jurisdictions protects inheritance and optimizes tax. Would you like me to outline how the structure would work?";
+      if(q.includes("pension")||q.includes("saving"))
+        return "The Spanish pension fund pays up to 7% a year, lifelong and insured. Would you like to see projected payouts?";
+      return "Alright: “"+t+"”. The optimal route is a UAE Golden Visa (from $205k) plus a trust across 3 jurisdictions — 10-year residency and inheritance protection. Would you like me to go over the next steps?";
+    }
+  }
+};
+
+function enterApp(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  if(!location.hash || location.hash==='#login') location.hash='#home';
+  render();
+}
+function logout(){
+  stopSpeech();
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+  location.hash='#login';
+}
+window.addEventListener('hashchange',()=>{ if(!document.getElementById('app').classList.contains('hidden')) render(); });
+
+const TITLES={home:"Profile",developer:"Developer",banks:"Banks / Investments",startups:"Startups",wealth:"Wealth · Trust"};
+
+function render(){
+  stopSpeech();
+  let route=(location.hash||'#home').replace('#','');
+  if(route==='login'){return;}
+  if(!TITLES[route]) route='home';
+  document.querySelectorAll('.nav-item[data-route]').forEach(n=>
+    n.classList.toggle('active', n.dataset.route===route));
+  document.getElementById('crumb').innerHTML='Main / <b>'+TITLES[route]+'</b>';
+  const c=document.getElementById('content');
+  if(route==='home') c.innerHTML=homeView();
+  else c.innerHTML=serviceView(route);
+  if(SPEC[route]) initChat(route);
+}
+
+function homeView(){
+  return `<div class="view">
+    <div class="page-head">
+      <h1>Welcome, ${USER.name} 👋</h1>
+      <p>This is your single investment account. Fill in your asset questionnaire, then pick services from the menu —
+         each one connects you with a live specialist who talks with you by voice and takes care of everything for you.</p>
+    </div>
+
+    <div class="grid g3" style="margin-bottom:22px">
+      <div class="card"><div class="stat"><span class="l">Assets in profile</span>
+        <span class="n">$1.84M</span><span class="up">▲ 6.2% this year</span></div></div>
+      <div class="card"><div class="stat"><span class="l">Active requests</span>
+        <span class="n">3</span><span class="l">2 in progress · 1 pending</span></div></div>
+      <div class="card"><div class="stat"><span class="l">Profile questionnaire</span>
+        <span class="n">70%</span><div class="progress"><span style="width:70%"></span></div></div></div>
+    </div>
+
+    <div class="section-title"><h2>My services</h2><span class="pill">tap "+ Add" to connect a new one</span></div>
+    <div class="grid g3">
+      ${svcCard("🏙","Developer","Real estate worldwide — mostly Dubai. A specialist finds it and handles it.","developer")}
+      ${svcCard("🏦","Banks / Investments","Deposits at annual rates with goals like “buy a house in 5 years”.","banks")}
+      ${svcCard("🚀","Startups","Startup marketplace, terms, business analytics, enter the deal.","startups")}
+      ${svcCard("🛡","Wealth · Trust","Golden Visa, Family Trust, pension programs.","wealth")}
+      <div class="card hover" style="display:grid;place-items:center;border-style:dashed;color:var(--mut)"
+           onclick="this.querySelector('div').innerHTML='Catalog of service apps<br><small style=opacity:.7>(connect Developer, Banks, Insurance, Legal, Crypto…)</small>'">
+        <div style="text-align:center"><div style="font-size:30px">＋</div>Add a service</div>
+      </div>
+    </div>
+  </div>`;
+}
+function svcCard(ic,title,desc,route){
+  return `<div class="card hover" onclick="location.hash='#${route}'">
+    <div class="ic-lg">${ic}</div>
+    <h3>${title}</h3>
+    <div class="muted">${desc}</div>
+    <div class="foot"><span class="pill ok">● active</span><span class="btn sm ghost" style="margin-left:auto">Open →</span></div>
+  </div>`;
+}
+
+function serviceView(route){
+  const data = route==='developer'?ESTATES : route==='startups'?STARTUPS : route==='banks'?ESTATES : WEALTH;
+  const a=SPEC[route];
+  const heads={
+    developer:["Developer — real estate","Pick a property or just talk to the specialist (voice or text) about what you need."],
+    banks:["Banks / Investments","Set an investment goal with the specialist. Accrued interest can be directed toward buying a house from the Developer."],
+    startups:["Startups","Explore projects, ask the specialist about terms and analytics, and enter the deal."],
+    wealth:["Wealth · Trust","Golden Visa, Family Trust and pension programs — the specialist suggests the optimal structure."]
+  };
+  const items = route==='banks' ? bankCards() : data.map(cardEstate).join('');
+  const sect = route==='startups'?'Projects':route==='banks'?'Programs':'Listings';
+  return `<div class="view">
+    <div class="page-head"><h1>${heads[route][0]}</h1><p>${heads[route][1]}</p></div>
+    <div class="svc-layout">
+      <div>
+        <div class="section-title"><h2>${sect}</h2>
+          <span class="pill gold">🎙 Specialist matches to your request</span></div>
+        <div class="listing">${items}</div>
+      </div>
+      ${specPanel(a)}
+    </div>
+  </div>`;
+}
+function cardEstate(e){
+  return `<div class="estate">
+    <div class="thumb">${e.ic}</div>
+    <div style="flex:1">
+      <h4>${e.t}</h4><div class="loc">📍 ${e.loc}</div>
+      <div class="price">${e.price}</div>
+      <div class="meta">${e.m.map(x=>'<span>• '+x+'</span>').join('')}</div>
+    </div>
+    <button class="btn sm primary" style="align-self:center" onclick="askAbout('${e.t.replace(/'/g,'')}')">Ask specialist</button>
+  </div>`;
+}
+function bankCards(){
+  const b=[
+    {ic:"💠",t:"“5-year” savings deposit",loc:"goal — buying a house",price:"6.5% a year",m:["compounding","convert to real estate"]},
+    {ic:"🔒",t:"Conservative portfolio",loc:"minimum risk",price:"4.2% a year",m:["bonds","deposit insured"]},
+    {ic:"⚡",t:"Active portfolio",loc:"higher yield",price:"up to 11% a year",m:["stocks + startups","higher risk"]},
+  ];
+  return b.map(cardEstate).join('');
+}
+
+function specPanel(a){
+  return `<div class="ai-panel">
+    <div class="ai-head">
+      <div class="ai-orb" id="orb">${a.orb}</div>
+      <div><b>${a.name}</b><small>online · voice &amp; chat</small></div>
+      <select class="vlang" id="voiceLang" title="Voice language">
+        <option value="en-US">EN</option>
+        <option value="ru-RU">RU</option>
+        <option value="hy-AM">HY</option>
+      </select>
+    </div>
+    <div class="ai-body" id="aiBody"></div>
+    <div class="quick" id="aiQuick">
+      ${a.quick.map(q=>`<button onclick="askAbout('${q.replace(/'/g,'')}')">${q}</button>`).join('')}
+    </div>
+    <div class="ai-input">
+      <button class="mic" id="micBtn" onclick="toggleListen()" title="Hold a voice conversation">🎤</button>
+      <textarea id="aiText" placeholder="Speak with 🎤 or type here…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+      <button class="send" onclick="sendMsg()">➤</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------- conversation ---------------- */
+let CUR=null;
+let HIST={};          // per-service dialogue history sent to the LLM
+let LEADSENT={};      // per-service: whether the lead was silently forwarded to backend
+function initChat(route){
+  CUR=route;
+  HIST[route]=[]; LEADSENT[route]=false;
+  const body=document.getElementById('aiBody');
+  body.innerHTML='';
+  addMsg('ai',SPEC[route].hello);
+  HIST[route].push({role:'model',text:SPEC[route].hello});
+  addMsg('warn','🎤 Tap the microphone and speak — the specialist listens and answers by voice. Tap again to stop.');
+}
+function addMsg(type,text){
+  const body=document.getElementById('aiBody');
+  const d=document.createElement('div'); d.className='msg '+type; d.innerHTML=text;
+  body.appendChild(d); body.scrollTop=body.scrollHeight;
+  return d;
+}
+function askAbout(t){ const el=document.getElementById('aiText'); el.value=t; sendMsg(); }
+async function sendMsg(){
+  const el=document.getElementById('aiText'); const t=el.value.trim(); if(!t) return;
+  const route=CUR;
+  unlockTTS();
+  el.value=''; addMsg('me',t);
+  (HIST[route]=HIST[route]||[]).push({role:'user',text:t});
+  const body=document.getElementById('aiBody');
+  const typ=document.createElement('div'); typ.className='msg ai typing';
+  typ.innerHTML='<span></span><span></span><span></span>'; body.appendChild(typ); body.scrollTop=body.scrollHeight;
+
+  let replyText=null;
+  // If a backend is running (http/https) use live Gemini; opened as a plain file → templated answers.
+  if(location.protocol.indexOf('http')===0){
+    try{
+      const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({service:route,message:t,history:HIST[route].slice(0,-1)})});
+      if(r.ok){ const d=await r.json(); if(d && d.reply) replyText=d.reply; }
+    }catch(e){ /* no backend — fall back below */ }
+  }
+  if(!replyText) replyText=SPEC[route].reply(t);   // templated fallback
+
+  typ.remove();
+  HIST[route].push({role:'model',text:replyText});
+  addMsg('ai',replyText);
+  speak(replyText);
+  silentLead(route);
+}
+// The specialist silently forwards the lead to our backend (CRM). The client is NOT notified.
+function silentLead(route){
+  if(LEADSENT[route]) return;
+  LEADSENT[route]=true;
+  if(location.protocol.indexOf('http')!==0) return;   // no backend when opened as a file
+  try{ fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({service:route,client:USER.name,history:HIST[route]})}).catch(()=>{}); }catch(e){}
+}
+
+/* ---------------- VOICE (runs fully in the browser — no server) ----------------
+   Input  : Web Speech API — works in Chrome on desktop/Android. NOT in iPhone Safari.
+   Output : speech synthesis — works in Chrome and in iPhone Safari (unlocked on first tap). */
+let recog=null, listening=false, ttsUnlocked=false;
+function currentLang(){ const s=document.getElementById('voiceLang'); return s?s.value:'en-US'; }
+function setMic(on){ listening=on; const b=document.getElementById('micBtn');
+  if(b){ b.classList.toggle('rec',on); b.textContent=on?'■':'🎤'; } }
+
+function unlockTTS(){
+  if(ttsUnlocked || !('speechSynthesis' in window)) return;
+  try{ const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); ttsUnlocked=true; }catch(e){}
+}
+
+function toggleListen(){
+  unlockTTS();                                   // enable spoken replies (needed on iOS)
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ addMsg('warn','🎤 Voice input isn’t supported in this browser (e.g. iPhone Safari). Type your message — the specialist will still answer by voice.'); return; }
+  if(listening){ try{ recog && recog.stop(); }catch(_){}; return; }
+  try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(_){}
+  recog=new SR();
+  recog.lang=currentLang();
+  recog.interimResults=false; recog.maxAlternatives=1;
+  recog.onstart=()=>{ setMic(true); addMsg('warn','🎤 Listening… speak now.'); };
+  recog.onresult=(e)=>{ const t=e.results[0][0].transcript; const el=document.getElementById('aiText');
+    if(el){ el.value=t; sendMsg(); } };
+  recog.onerror=(e)=>{ setMic(false);
+    if(e.error==='not-allowed'||e.error==='service-not-allowed') addMsg('warn','🎤 Microphone blocked — please allow mic access for this page.');
+    else if(e.error==='no-speech') addMsg('warn','🎤 I didn’t hear anything — tap 🎤 and speak again.'); };
+  recog.onend=()=>setMic(false);
+  try{ recog.start(); }catch(_){ setMic(false); }
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=currentLang(); u.rate=1; u.pitch=1;
+  const orb=document.getElementById('orb');
+  u.onstart=()=>{ if(orb) orb.classList.add('speaking'); };
+  u.onend=()=>{ if(orb) orb.classList.remove('speaking'); };
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+function stopSpeech(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const orb=document.getElementById('orb'); if(orb) orb.classList.remove('speaking');
+  try{ if(recog) recog.stop(); }catch(_){}
+  setMic(false);
+}
+
+(function boot(){
+  const h=(location.hash||'').replace('#','');
+  if(h && h!=='login' && TITLES[h]){ enterApp(); }
+})();
+</script>
+</body>
+</html>
